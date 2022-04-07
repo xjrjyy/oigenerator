@@ -1,5 +1,6 @@
 #include <cstdlib>
 
+#include <cctype>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -12,6 +13,9 @@
 #include "runner/runner.h"
 #include "configparser/configparser.h"
 
+#include "comparer.h"
+#include "comparer/linebylinecomparer/linebylinecomparer.h"
+
 int main(int argc, char *argv[]) {
     cxxopts::Options options("OIGenerator", "OI Testdata Generator");
     
@@ -21,6 +25,7 @@ int main(int argc, char *argv[]) {
         ("p,path", "Data path", cxxopts::value<std::string>()->default_value("data"))
         ("g,gen", "Gen path", cxxopts::value<std::string>()->default_value("gen.cpp"))
         ("s,std", "Std path", cxxopts::value<std::string>()->default_value("std.cpp"))
+        ("u,usr", "User code path", cxxopts::value<std::string>()->default_value(""))
         ("f,file", "Data filename template", cxxopts::value<std::string>()->default_value("data{}"))
         ("i,in", "Input file extension name", cxxopts::value<std::string>()->default_value(".in"))
         ("o,out", "Output file extension name", cxxopts::value<std::string>()->default_value(".out"))
@@ -30,6 +35,7 @@ int main(int argc, char *argv[]) {
         ("command-c", "C compile command", cxxopts::value<std::string>()->default_value(Config::compile_c_command))
         ("command-cpp", "Cpp compile command", cxxopts::value<std::string>()->default_value(Config::compile_cpp_command))
         ("c,config", "Data config path", cxxopts::value<std::string>()->default_value(""))
+        ("compare", "Enable comparing output with answer", cxxopts::value<bool>()->default_value("true"))
         ("h,help", "Print usage")
     ;
     auto result = options.parse(argc, argv);
@@ -50,6 +56,7 @@ int main(int argc, char *argv[]) {
     fs::path data_path(result["path"].as<std::string>());
     fs::path gen_path(result["gen"].as<std::string>());
     fs::path std_path(result["std"].as<std::string>());
+    fs::path usr_path(result["usr"].as<std::string>());
 
     std::string data_filename_template = result["file"].as<std::string>();
     std::string input_extension = result["in"].as<std::string>();
@@ -68,6 +75,12 @@ int main(int argc, char *argv[]) {
 
     Runner gen_runner(gen_path, recompiling);
     Runner std_runner(std_path, recompiling);
+    Runner usr_runner(usr_path, recompiling);
+    bool comparing = result["compare"].as<bool>();
+    Comparer *comparer = nullptr;
+    // TODO: choose comparer
+    if (comparing) comparer = new LineByLineComparer();
+
     if (!fs::exists(data_path)) {
         bool result = fs::create_directories(data_path);
         if (!result) {
@@ -88,6 +101,26 @@ int main(int argc, char *argv[]) {
             gen_runner.Start(fs::path(), input_path);
         }
         std_runner.Start(input_path, answer_path);
+        if (fs::exists(usr_path)) {
+            usr_runner.Start(input_path, output_path);
+            if (comparing) {
+                if (!comparer->Compare(output_path, answer_path)) {
+                    std::cout << fmt::format(
+                        "There is a difference between output({}) and answer({}).",
+                        output_path.string(),
+                        answer_path.string()
+                    ) << std::endl;
+                    std::cout << "Do you want to continue? (y/n)" << std::endl;
+                    char choice = '\0';
+                    while (true) {
+                        std::cin >> choice;
+                        choice = tolower(choice);
+                        if (choice == 'y' || choice == 'n') break;
+                    }
+                    if (choice == 'n') exit(1);
+                }
+            }
+        }
     }
     return 0;
 }

@@ -10,11 +10,13 @@ target_sources(oigen
 add_subdirectory(configparser)
 add_subdirectory(compiler)
 add_subdirectory(runner)
+add_subdirectory(comparer)
 
 target_link_libraries(oigen PRIVATE
     configparser
     compiler
     runner
+    linebylinecomparer
     fmt::fmt
     cxxopts
 )

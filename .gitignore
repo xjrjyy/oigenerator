@@ -1,6 +1,4 @@
 build/
 .vscode/
 
-CTestCostData.txt
-LastTest.log
-LastTestsFailed.log
+Testing

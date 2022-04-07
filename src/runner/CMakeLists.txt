@@ -9,9 +9,8 @@ target_sources(runner
 target_link_libraries(runner PUBLIC
     ghc_filesystem
     fmt::fmt
+    compiler
 )
-
-target_link_libraries(runner PUBLIC compiler)
 
 target_include_directories(runner PUBLIC
     ${CMAKE_CURRENT_LIST_DIR}
