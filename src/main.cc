@@ -36,6 +36,7 @@ int main(int argc, char *argv[]) {
         ("command-cpp", "Cpp compile command", cxxopts::value<std::string>()->default_value(Config::compile_cpp_command))
         ("c,config", "Data config path", cxxopts::value<std::string>()->default_value(""))
         ("compare", "Enable comparing output with answer", cxxopts::value<bool>()->default_value("true"))
+        ("show-id", "Enable showing data id", cxxopts::value<bool>()->default_value("false"))
         ("h,help", "Print usage")
     ;
     auto result = options.parse(argc, argv);
@@ -81,6 +82,8 @@ int main(int argc, char *argv[]) {
     // TODO: choose comparer
     if (comparing) comparer = new LineByLineComparer();
 
+    bool show_data_id = result["show-id"].as<bool>();
+
     if (!fs::exists(data_path)) {
         bool result = fs::create_directories(data_path);
         if (!result) {
@@ -88,6 +91,7 @@ int main(int argc, char *argv[]) {
         }
     }
     for (std::size_t data_id = 1; data_id <= num_data; ++data_id) {
+        if (show_data_id) std::cout << fmt::format("Data #{}", data_id) << std::endl;
         std::string data_filename = fmt::format(data_filename_template, data_id);
         std::string input_filename = data_filename + input_extension;
         std::string output_filename = data_filename + output_extension;
