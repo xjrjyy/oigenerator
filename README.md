@@ -56,11 +56,16 @@ int main() {
 
 当然，你也可以自行魔改 `start.bat`。
 
-命令：`.\oigen.exe -f my{}data`  设置测试数据文件名，`{}` 内会填入数据编号。
-
-命令：`.\oigen.exe --compiler-cpp g++` 设置 C++ 编译器目录。
-
-命令：`.\oigen.exe -c {path_to_config}` 配置数据命令。
+- 命令参数 `--show-id` 显示数据编号。
+- 命令参数 `-f my{}data` 设置测试数据文件名，`{}` 内会填入数据编号。
+- 命令参数 `--compiler-cpp g++` 设置 C++ 编译器目录。
+- 命令参数 `-c {path_to_config}` 设置配置文件目录。
+- 命令参数 `-u {path_to_user_code}` 设置用户代码目录。
+  - 设置了用户代码目录后，可以通过命令参数 `--compare` 开启对拍模式。
+  - 这是对拍命令示例：`.\oigen -n 1000 -p chk -u usr.cpp -f data --show-id`。
+  - 使用示例命令后，OI Generator 将会在 `chk` 目录下对拍 1000 次，并且展示数据编号。
+  - 对拍默认使用全文比较，忽略文末空格和行末回车。
+  - 当找到差异时，OI Generator 会提示是否继续，你可以选择继续对拍或者退出对拍。
 
 以下是配置文件示例：
 
