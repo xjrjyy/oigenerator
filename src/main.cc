@@ -16,35 +16,7 @@
 #include "comparer.h"
 #include "comparer/linebylinecomparer/linebylinecomparer.h"
 
-int main(int argc, char *argv[]) {
-    cxxopts::Options options("OIGenerator", "OI Testdata Generator");
-    
-    options.add_options()
-        ("r", "Enable recompiling", cxxopts::value<bool>()->default_value("false"))
-        ("n,num", "Number of testdata", cxxopts::value<std::size_t>()->default_value("10"))
-        ("p,path", "Data path", cxxopts::value<std::string>()->default_value("data"))
-        ("g,gen", "Gen path", cxxopts::value<std::string>()->default_value("gen.cpp"))
-        ("s,std", "Std path", cxxopts::value<std::string>()->default_value("std.cpp"))
-        ("u,usr", "User code path", cxxopts::value<std::string>()->default_value(""))
-        ("f,file", "Data filename template", cxxopts::value<std::string>()->default_value("data{}"))
-        ("i,in", "Input file extension name", cxxopts::value<std::string>()->default_value(".in"))
-        ("o,out", "Output file extension name", cxxopts::value<std::string>()->default_value(".out"))
-        ("a,ans", "Answer file extension name", cxxopts::value<std::string>()->default_value(".ans"))
-        ("compiler-c", "C compiler path", cxxopts::value<std::string>()->default_value(Config::compiler_c_path))
-        ("compiler-cpp", "Cpp compiler path", cxxopts::value<std::string>()->default_value(Config::compiler_cpp_path))
-        ("command-c", "C compile command", cxxopts::value<std::string>()->default_value(Config::compile_c_command))
-        ("command-cpp", "Cpp compile command", cxxopts::value<std::string>()->default_value(Config::compile_cpp_command))
-        ("c,config", "Data config path", cxxopts::value<std::string>()->default_value(""))
-        ("compare", "Enable comparing output with answer", cxxopts::value<bool>()->default_value("true"))
-        ("show-id", "Enable showing data id", cxxopts::value<bool>()->default_value("false"))
-        ("h,help", "Print usage")
-    ;
-    auto result = options.parse(argc, argv);
-    if (result.count("help")) {
-        std::cout << options.help() << std::endl;
-        return 0;
-    }
-
+int generate(cxxopts::ParseResult result) {
     Config::compiler_c_path = result["compiler-c"].as<std::string>();
     Config::compiler_cpp_path = result["compiler-cpp"].as<std::string>();
     Config::compile_c_command = result["command-c"].as<std::string>();
@@ -88,6 +60,7 @@ int main(int argc, char *argv[]) {
         bool result = fs::create_directories(data_path);
         if (!result) {
             std::cerr << fmt::format("Can not create dir {}", data_path.string()) << std::endl;
+            return 1;
         }
     }
     for (std::size_t data_id = 1; data_id <= num_data; ++data_id) {
@@ -121,10 +94,41 @@ int main(int argc, char *argv[]) {
                         choice = tolower(choice);
                         if (choice == 'y' || choice == 'n') break;
                     }
-                    if (choice == 'n') exit(1);
+                    if (choice == 'n') return 1;
                 }
             }
         }
     }
     return 0;
+}
+
+int main(int argc, char *argv[]) {
+    cxxopts::Options options("OIGenerator", "OI Testdata Generator");
+    
+    options.add_options()
+        ("r", "Enable recompiling", cxxopts::value<bool>()->default_value("false"))
+        ("n,num", "Number of testdata", cxxopts::value<std::size_t>()->default_value("10"))
+        ("p,path", "Data path", cxxopts::value<std::string>()->default_value("data"))
+        ("g,gen", "Gen path", cxxopts::value<std::string>()->default_value("gen.cpp"))
+        ("s,std", "Std path", cxxopts::value<std::string>()->default_value("std.cpp"))
+        ("u,usr", "User code path", cxxopts::value<std::string>()->default_value(""))
+        ("f,file", "Data filename template", cxxopts::value<std::string>()->default_value("data{}"))
+        ("i,in", "Input file extension name", cxxopts::value<std::string>()->default_value(".in"))
+        ("o,out", "Output file extension name", cxxopts::value<std::string>()->default_value(".out"))
+        ("a,ans", "Answer file extension name", cxxopts::value<std::string>()->default_value(".ans"))
+        ("compiler-c", "C compiler path", cxxopts::value<std::string>()->default_value(Config::compiler_c_path))
+        ("compiler-cpp", "Cpp compiler path", cxxopts::value<std::string>()->default_value(Config::compiler_cpp_path))
+        ("command-c", "C compile command", cxxopts::value<std::string>()->default_value(Config::compile_c_command))
+        ("command-cpp", "Cpp compile command", cxxopts::value<std::string>()->default_value(Config::compile_cpp_command))
+        ("c,config", "Data config path", cxxopts::value<std::string>()->default_value(""))
+        ("compare", "Enable comparing output with answer", cxxopts::value<bool>()->default_value("true"))
+        ("show-id", "Enable showing data id", cxxopts::value<bool>()->default_value("false"))
+        ("h,help", "Print usage")
+    ;
+    auto result = options.parse(argc, argv);
+    if (result.count("help")) {
+        std::cout << options.help() << std::endl;
+        return 0;
+    }
+    return generate(result);
 }
