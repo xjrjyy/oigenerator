@@ -17,14 +17,18 @@
 #include "comparer.h"
 #include "comparer/linebylinecomparer/linebylinecomparer.h"
 
-int generate(cxxopts::ParseResult result) {
+Config ParseConfig(cxxopts::ParseResult result) {
     std::map<std::string, std::string> config_map;
     config_map["compiler_c_path"] = result["compiler-c"].as<std::string>();
     config_map["compiler_cpp_path"] = result["compiler-cpp"].as<std::string>();
     config_map["compile_c_command"] = result["command-c"].as<std::string>();
     config_map["compile_cpp_command"] = result["command-cpp"].as<std::string>();
     config_map["recompiling"] = (result["recompile"].as<bool>() ? "true" : "false");
-    Config config(config_map);
+    return Config(config_map);
+}
+
+int Generate(cxxopts::ParseResult result) {
+    Config config(ParseConfig(result));
 
     std::size_t num_data = result["num"].as<std::size_t>();
 
@@ -141,5 +145,5 @@ int main(int argc, char *argv[]) {
         std::cout << options.help() << std::endl;
         return 0;
     }
-    return generate(result);
+    return Generate(result);
 }
