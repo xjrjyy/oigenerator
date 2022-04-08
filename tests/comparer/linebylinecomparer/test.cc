@@ -60,6 +60,15 @@ TEST_CASE("test LineByLineComparer") {
         WriteData("endline\nendline\n\n", "endline\nendline\n");
         REQUIRE(comparer.Compare(output_path, answer_path));
 
+        WriteData("endline\n\n\nendline", "endline\n\n\nendline\n");
+        REQUIRE(comparer.Compare(output_path, answer_path));
+        WriteData("endline\n\n\nendline\n", "endline\n\n\nendline");
+        REQUIRE(comparer.Compare(output_path, answer_path));
+        WriteData("endline\n\n\nendline\n", "endline\n\n\nendline\n\n");
+        REQUIRE(comparer.Compare(output_path, answer_path));
+        WriteData("endline\n\n\nendline\n\n", "endline\n\n\nendline\n");
+        REQUIRE(comparer.Compare(output_path, answer_path));
+
         WriteData("endline\nendline", "endline\nendline\n\n");
         REQUIRE(!comparer.Compare(output_path, answer_path));
         WriteData("endline\nendline\n\n", "endline\nendline");
@@ -68,9 +77,9 @@ TEST_CASE("test LineByLineComparer") {
     SECTION("test all") {
         WriteData("space\nendline", "space\nendline \n");
         REQUIRE(comparer.Compare(output_path, answer_path));
-        WriteData("space\nendline\n", "space \nendline \n");
+        WriteData("space\n\nendline\n", "space \n\nendline \n");
         REQUIRE(comparer.Compare(output_path, answer_path));
-        WriteData("space \nendline \n", "space\nendline");
+        WriteData("space \n\nendline \n", "space\n\nendline");
         REQUIRE(comparer.Compare(output_path, answer_path));
 
         WriteData("space\nendline", "space\nendline\n\n");
