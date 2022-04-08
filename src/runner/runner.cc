@@ -7,8 +7,8 @@
 
 #include "compiler/compiler.h"
 
-Runner::Runner(const fs::path &path, bool recompiling)
-    : path_(path), recompiling_(recompiling), compiled_(false) {}
+Runner::Runner(const fs::path &path, const Config &config)
+    : path_(path), config_(config), compiled_(false) {}
 
 int Runner::Start(
     const fs::path &input_path,
@@ -36,18 +36,17 @@ int Runner::Start(
     if (file_type == FileType::Exe) { // TODO:
         result = system((path_.string() + command).c_str());
     } else if (file_type == FileType::C || file_type == FileType::Cpp) {
-        // TODO: run C/C++ files
         fs::path exe_path = path_;
         exe_path.replace_extension(".exe");
-        if (!compiled_ || recompiling_) {
-            Compiler compiler(file_type);
+        if (!compiled_ || config_.GetRecompiling()) {
+            Compiler compiler(file_type, config_);
             result = compiler.Compile(path_, exe_path);
             if (result) return result; // TODO: Magic Number
             compiled_ = true;
         }
         result = system((exe_path.string() + command).c_str());
     } else if (file_type == FileType::Python) {
-        // TODO: run python files
+        // TODO: set python interpreter path
         result = system(("python " + path_.string() + command).c_str());
     } else {
         result = -1; // TODO: Magic Number
@@ -63,7 +62,8 @@ FileType Runner::FindFileType(const fs::path &path) {
 
 // TODO: config
 const std::unordered_map<std::string, FileType> Runner::kExtFileType = {
-    {".exe", FileType::Exe},
+    {".exe", FileType::Exe}, // Windows
+    {".out", FileType::Exe}, // Linux
     {".c", FileType::C}, // TODO: all c/cpp extension
     {".cpp", FileType::Cpp},
     {".cc", FileType::Cpp},

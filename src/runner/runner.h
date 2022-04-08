@@ -7,11 +7,12 @@
 #include "filesystem.h"
 
 #include "filetype.h"
+#include "config.h"
 
 class Runner {
 public:
     Runner() = delete;
-    Runner(const fs::path &, bool = false);
+    Runner(const fs::path &, const Config &);
     Runner(const Runner &) = default;
     // TODO: Runner &&
     ~Runner() = default;
@@ -25,7 +26,8 @@ private:
     static FileType FindFileType(const fs::path &);
     static const std::unordered_map<std::string, FileType> kExtFileType;
     fs::path path_;
-    bool recompiling_, compiled_;
+    bool compiled_;
+    Config config_;
 };
 
 #endif // OIGENERATOR_SRC_RUNNER_RUNNER_H

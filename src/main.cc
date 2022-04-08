@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <map>
 
 #include "fmt/core.h"
 #include "filesystem.h"
@@ -17,12 +18,13 @@
 #include "comparer/linebylinecomparer/linebylinecomparer.h"
 
 int generate(cxxopts::ParseResult result) {
-    Config::compiler_c_path = result["compiler-c"].as<std::string>();
-    Config::compiler_cpp_path = result["compiler-cpp"].as<std::string>();
-    Config::compile_c_command = result["command-c"].as<std::string>();
-    Config::compile_cpp_command = result["command-cpp"].as<std::string>();
-    
-    bool recompiling = result["r"].as<bool>();
+    std::map<std::string, std::string> config_map;
+    config_map["compiler_c_path"] = result["compiler-c"].as<std::string>();
+    config_map["compiler_cpp_path"] = result["compiler-cpp"].as<std::string>();
+    config_map["compile_c_command"] = result["command-c"].as<std::string>();
+    config_map["compile_cpp_command"] = result["command-cpp"].as<std::string>();
+    config_map["recompiling"] = (result["recompile"].as<bool>() ? "true" : "false");
+    Config config(config_map);
 
     std::size_t num_data = result["num"].as<std::size_t>();
 
@@ -46,9 +48,9 @@ int generate(cxxopts::ParseResult result) {
         std::cout << fmt::format("data config size {}", data_config.size()) << std::endl;
     }
 
-    Runner gen_runner(gen_path, recompiling);
-    Runner std_runner(std_path, recompiling);
-    Runner usr_runner(usr_path, recompiling);
+    Runner gen_runner(gen_path, config);
+    Runner std_runner(std_path, config);
+    Runner usr_runner(usr_path, config);
     bool comparing = result["compare"].as<bool>();
     Comparer *comparer = nullptr;
     // TODO: choose comparer
@@ -104,9 +106,10 @@ int generate(cxxopts::ParseResult result) {
 
 int main(int argc, char *argv[]) {
     cxxopts::Options options("OIGenerator", "OI Testdata Generator");
+    Config default_config;
     
     options.add_options()
-        ("r", "Enable recompiling", cxxopts::value<bool>()->default_value("false"))
+        ("r,recompile", "Enable recompiling", cxxopts::value<bool>()->default_value(default_config.GetRecompiling() ? "true" : "false"))
         ("n,num", "Number of testdata", cxxopts::value<std::size_t>()->default_value("10"))
         ("p,path", "Data path", cxxopts::value<std::string>()->default_value("data"))
         ("g,gen", "Gen path", cxxopts::value<std::string>()->default_value("gen.cpp"))
@@ -116,10 +119,10 @@ int main(int argc, char *argv[]) {
         ("i,in", "Input file extension name", cxxopts::value<std::string>()->default_value(".in"))
         ("o,out", "Output file extension name", cxxopts::value<std::string>()->default_value(".out"))
         ("a,ans", "Answer file extension name", cxxopts::value<std::string>()->default_value(".ans"))
-        ("compiler-c", "C compiler path", cxxopts::value<std::string>()->default_value(Config::compiler_c_path))
-        ("compiler-cpp", "Cpp compiler path", cxxopts::value<std::string>()->default_value(Config::compiler_cpp_path))
-        ("command-c", "C compile command", cxxopts::value<std::string>()->default_value(Config::compile_c_command))
-        ("command-cpp", "Cpp compile command", cxxopts::value<std::string>()->default_value(Config::compile_cpp_command))
+        ("compiler-c", "C compiler path", cxxopts::value<std::string>()->default_value(default_config.GetCompilerCPath()))
+        ("compiler-cpp", "Cpp compiler path", cxxopts::value<std::string>()->default_value(default_config.GetCompilerCppPath()))
+        ("command-c", "C compile command", cxxopts::value<std::string>()->default_value(default_config.GetCompileCCommand()))
+        ("command-cpp", "Cpp compile command", cxxopts::value<std::string>()->default_value(default_config.GetCompileCppCommand()))
         ("c,config", "Data config path", cxxopts::value<std::string>()->default_value(""))
         ("compare", "Enable comparing output with answer", cxxopts::value<bool>()->default_value("true"))
         ("show-id", "Enable showing data id", cxxopts::value<bool>()->default_value("false"))
