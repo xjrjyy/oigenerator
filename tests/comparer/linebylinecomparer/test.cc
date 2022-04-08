@@ -46,6 +46,10 @@ TEST_CASE("test LineByLineComparer") {
         REQUIRE(comparer.Compare(output_path, answer_path));
         WriteData("\n\n\n\n\n", "\n\n\n\n");
         REQUIRE(comparer.Compare(output_path, answer_path));
+        WriteData("\n\n\n\n", "\n\n\n\n\n\n");
+        REQUIRE(!comparer.Compare(output_path, answer_path));
+        WriteData("\n\n\n\n\n\n", "\n\n\n\n");
+        REQUIRE(!comparer.Compare(output_path, answer_path));
 
         WriteData("endline\nendline", "endline\nendline\n");
         REQUIRE(comparer.Compare(output_path, answer_path));
