@@ -6,13 +6,13 @@
 
 #include "filesystem.h"
 
-class ConfigParser {
+class DataConfigParser {
 public:
-    ConfigParser() = delete;
-    ConfigParser(const fs::path &);
-    ConfigParser(const ConfigParser &) = default;
-    // TODO: ConfigParser &&
-    ~ConfigParser() = default;
+    DataConfigParser() = delete;
+    DataConfigParser(const fs::path &);
+    DataConfigParser(const DataConfigParser &) = default;
+    // TODO: DataConfigParser &&
+    ~DataConfigParser() = default;
     bool Parse();
     std::vector<std::string> GetConfig() const;
 private:

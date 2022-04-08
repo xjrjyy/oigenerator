@@ -12,7 +12,7 @@
 
 #include "config.h"
 #include "runner/runner.h"
-#include "configparser/configparser.h"
+#include "dataconfigparser/dataconfigparser.h"
 
 #include "comparer.h"
 #include "comparer/linebylinecomparer/linebylinecomparer.h"
@@ -46,9 +46,9 @@ int Generate(cxxopts::ParseResult result) {
     std::vector<std::string> data_config;
 
     if (!data_config_path.empty()) {
-        ConfigParser config_parser(data_config_path);
-        config_parser.Parse();
-        data_config = config_parser.GetConfig();
+        DataConfigParser data_config_parser(data_config_path);
+        data_config_parser.Parse();
+        data_config = data_config_parser.GetConfig();
         std::cout << fmt::format("data config size {}", data_config.size()) << std::endl;
     }
 

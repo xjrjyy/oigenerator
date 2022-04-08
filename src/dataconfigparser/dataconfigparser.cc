@@ -1,15 +1,13 @@
-#include "configparser.h"
+#include "dataconfigparser.h"
 
 #include <iostream>
 
 #include "fmt/core.h"
 
-#include "config.h"
-
-ConfigParser::ConfigParser(const fs::path &path)
+DataConfigParser::DataConfigParser(const fs::path &path)
     : path_(path) {}
 
-bool ConfigParser::Parse() {
+bool DataConfigParser::Parse() {
     config_.clear();
     if (!fs::exists(path_)) return false;
     fs::ifstream config_file(path_, std::ios::binary);
@@ -32,6 +30,6 @@ bool ConfigParser::Parse() {
     return true;
 }
 
-std::vector<std::string> ConfigParser::GetConfig() const {
+std::vector<std::string> DataConfigParser::GetConfig() const {
     return config_;
 }

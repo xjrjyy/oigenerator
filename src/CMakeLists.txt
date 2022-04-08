@@ -7,13 +7,13 @@ target_sources(oigen
         ${PROJECT_SOURCE_DIR}/include/config.h
 )
 
-add_subdirectory(configparser)
+add_subdirectory(dataconfigparser)
 add_subdirectory(compiler)
 add_subdirectory(runner)
 add_subdirectory(comparer)
 
 target_link_libraries(oigen PRIVATE
-    configparser
+    dataconfigparser
     compiler
     runner
     linebylinecomparer

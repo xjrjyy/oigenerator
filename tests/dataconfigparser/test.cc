@@ -5,10 +5,10 @@
 
 #include "filesystem.h"
 
-#include "configparser.h"
+#include "dataconfigparser.h"
 
-TEST_CASE("test configparser") {
-    fs::path config_path(fs::temp_directory_path() / "oigen_config.txt");
+TEST_CASE("test dataconfigparser") {
+    fs::path config_path(fs::temp_directory_path() / "test_oigen_data_config_parser.txt");
     fs::ofstream config_file;
     std::vector<std::pair<int, std::string>> config;
     std::vector<std::string> raw_config;
@@ -36,12 +36,12 @@ TEST_CASE("test configparser") {
         }
         raw_config.push_back("");
         config_file.close();
-        ConfigParser config_parser(config_path);
-        REQUIRE(config_parser.Parse() == true);
-        REQUIRE(config_parser.GetConfig() == raw_config);
-        REQUIRE(config_parser.GetConfig() == raw_config);
-        REQUIRE(config_parser.Parse() == true);
-        REQUIRE(config_parser.GetConfig() == raw_config);
+        DataConfigParser data_config_parser(config_path);
+        REQUIRE(data_config_parser.Parse() == true);
+        REQUIRE(data_config_parser.GetConfig() == raw_config);
+        REQUIRE(data_config_parser.GetConfig() == raw_config);
+        REQUIRE(data_config_parser.Parse() == true);
+        REQUIRE(data_config_parser.GetConfig() == raw_config);
     }
     SECTION("test large config") {
         config = {
@@ -67,12 +67,12 @@ TEST_CASE("test configparser") {
         }
         raw_config.push_back("");
         config_file.close();
-        ConfigParser config_parser(config_path);
-        REQUIRE(config_parser.Parse() == true);
-        REQUIRE(config_parser.GetConfig() == raw_config);
-        REQUIRE(config_parser.GetConfig() == raw_config);
-        REQUIRE(config_parser.Parse() == true);
-        REQUIRE(config_parser.GetConfig() == raw_config);
+        DataConfigParser data_config_parser(config_path);
+        REQUIRE(data_config_parser.Parse() == true);
+        REQUIRE(data_config_parser.GetConfig() == raw_config);
+        REQUIRE(data_config_parser.GetConfig() == raw_config);
+        REQUIRE(data_config_parser.Parse() == true);
+        REQUIRE(data_config_parser.GetConfig() == raw_config);
     }
     SECTION("test empty config") {
         config = {};
@@ -82,11 +82,11 @@ TEST_CASE("test configparser") {
         raw_config.push_back("");
         config_file.close();
 
-        ConfigParser config_parser(config_path);
-        REQUIRE(config_parser.Parse() == true);
-        REQUIRE(config_parser.GetConfig() == raw_config);
-        REQUIRE(config_parser.GetConfig() == raw_config);
-        REQUIRE(config_parser.Parse() == true);
-        REQUIRE(config_parser.GetConfig() == raw_config);
+        DataConfigParser data_config_parser(config_path);
+        REQUIRE(data_config_parser.Parse() == true);
+        REQUIRE(data_config_parser.GetConfig() == raw_config);
+        REQUIRE(data_config_parser.GetConfig() == raw_config);
+        REQUIRE(data_config_parser.Parse() == true);
+        REQUIRE(data_config_parser.GetConfig() == raw_config);
     }
 }
