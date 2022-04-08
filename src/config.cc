@@ -6,6 +6,9 @@ Config::Config() {
     compiler_c_path_ = "gcc";
     compile_c_command_ = "{compiler} \"{src}\" -std=c11 -O2 -o \"{exe}\"";
     recompiling_ = false;
+    time_limit_ = std::chrono::milliseconds(2000);
+    memory_limit_ = -1;
+    printing_used_ = false;
 }
 
 Config::Config(const std::map<std::string, std::string> &config) : Config() {
@@ -25,6 +28,16 @@ Config::Config(const std::map<std::string, std::string> &config) : Config() {
         // TODO: string to bool
         recompiling_ = (config.at("recompiling") == "true");
     }
+    if (config.count("time_limit")) {
+        time_limit_ = std::chrono::milliseconds(std::stoll(config.at("time_limit")));
+    }
+    if (config.count("memory_limit")) {
+        memory_limit_ = std::stoi(config.at("memory_limit"));
+    }
+    if (config.count("printing_used")) {
+        // TODO: string to bool
+        printing_used_ = (config.at("printing_used") == "true");
+    }
 }
 
 std::string Config::GetCompilerCppPath() const {
@@ -41,4 +54,13 @@ std::string Config::GetCompileCCommand() const {
 }
 bool Config::GetRecompiling() const {
     return recompiling_;
+}
+std::chrono::milliseconds Config::GetTimeLimit() const {
+    return time_limit_;
+}
+int Config::GetMemoryLimit() const {
+    return memory_limit_;
+}
+bool Config::GetPrintingUsed() const {
+    return printing_used_;
 }

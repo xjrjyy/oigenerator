@@ -24,25 +24,28 @@ Config ParseConfig(cxxopts::ParseResult result) {
     config_map["compile_c_command"] = result["command-c"].as<std::string>();
     config_map["compile_cpp_command"] = result["command-cpp"].as<std::string>();
     config_map["recompiling"] = (result["recompile"].as<bool>() ? "true" : "false");
+    config_map["time_limit"] = std::to_string(result["time-limit"].as<long long>());
+    config_map["memory_limit"] = std::to_string(result["memory-limit"].as<int>());
+    config_map["printing_used"] = (result["print-used"].as<bool>() ? "true" : "false");
     return Config(config_map);
 }
 
-int Generate(cxxopts::ParseResult result) {
-    Config config(ParseConfig(result));
+int Generate(cxxopts::ParseResult option) {
+    Config config(ParseConfig(option));
 
-    std::size_t num_data = result["num"].as<std::size_t>();
+    std::size_t num_data = option["num"].as<std::size_t>();
 
-    fs::path data_path(result["path"].as<std::string>());
-    fs::path gen_path(result["gen"].as<std::string>());
-    fs::path std_path(result["std"].as<std::string>());
-    fs::path usr_path(result["usr"].as<std::string>());
+    fs::path data_path(option["path"].as<std::string>());
+    fs::path gen_path(option["gen"].as<std::string>());
+    fs::path std_path(option["std"].as<std::string>());
+    fs::path usr_path(option["usr"].as<std::string>());
 
-    std::string data_filename_template = result["file"].as<std::string>();
-    std::string input_extension = result["in"].as<std::string>();
-    std::string output_extension = result["out"].as<std::string>();
-    std::string answer_extension = result["ans"].as<std::string>();
+    std::string data_filename_template = option["file"].as<std::string>();
+    std::string input_extension = option["in"].as<std::string>();
+    std::string output_extension = option["out"].as<std::string>();
+    std::string answer_extension = option["ans"].as<std::string>();
 
-    fs::path data_config_path(result["config"].as<std::string>());
+    fs::path data_config_path(option["config"].as<std::string>());
     std::vector<std::string> data_config;
 
     if (!data_config_path.empty()) {
@@ -55,12 +58,12 @@ int Generate(cxxopts::ParseResult result) {
     Runner gen_runner(gen_path, config);
     Runner std_runner(std_path, config);
     Runner usr_runner(usr_path, config);
-    bool comparing = result["compare"].as<bool>();
+    bool comparing = option["compare"].as<bool>();
     Comparer *comparer = nullptr;
     // TODO: choose comparer
     if (comparing) comparer = new LineByLineComparer();
 
-    bool show_data_id = result["show-id"].as<bool>();
+    bool show_data_id = option["show-id"].as<bool>();
 
     if (!fs::exists(data_path)) {
         bool result = fs::create_directories(data_path);
@@ -77,6 +80,7 @@ int Generate(cxxopts::ParseResult result) {
             data_config.size()
         ) << std::endl;
     }
+    int result = 0;
     for (std::size_t data_id = 1; data_id <= num_data; ++data_id) {
         if (show_data_id) std::cout << fmt::format("Data #{}", data_id) << std::endl;
         std::string data_filename = fmt::format(data_filename_template, data_id);
@@ -87,20 +91,35 @@ int Generate(cxxopts::ParseResult result) {
         fs::path output_path = data_path / output_filename;
         fs::path answer_path = data_path / answer_filename;
         if (data_id - 1 < data_config.size()) {
-            gen_runner.Start(fs::path(), input_path, fs::path(), data_config[data_id - 1]);
+            result = gen_runner.Start(fs::path(), input_path, fs::path(), data_config[data_id - 1]);
         } else {
-            gen_runner.Start(fs::path(), input_path);
+            result = gen_runner.Start(fs::path(), input_path);
         }
-        std_runner.Start(input_path, answer_path);
+        if (result) {
+            std::cout << fmt::format("gen error: code {}", result) << std::endl;
+            return result;
+        }
+        result = std_runner.Start(input_path, answer_path);
+        if (result) {
+            std::cout << fmt::format("std error: code {}", result) << std::endl;
+            return result;
+        }
         if (fs::exists(usr_path)) {
-            usr_runner.Start(input_path, output_path);
+            result = usr_runner.Start(input_path, output_path);
             if (comparing) {
-                if (!comparer->Compare(output_path, answer_path)) {
-                    std::cout << fmt::format(
-                        "There is a difference between output({}) and answer({}).",
-                        output_path.string(),
-                        answer_path.string()
-                    ) << std::endl;
+                if (result || !comparer->Compare(output_path, answer_path)) {
+                    if (result) {
+                        std::cout << fmt::format(
+                            "user code error : code {}",
+                            result
+                        ) << std::endl;
+                    } else {
+                        std::cout << fmt::format(
+                            "output({}) is different from answer({})",
+                            output_path.string(),
+                            answer_path.string()
+                        ) << std::endl;
+                    }
                     std::cout << "Do you want to continue? (y/n)" << std::endl;
                     char choice = '\0';
                     while (true) {
@@ -110,6 +129,9 @@ int Generate(cxxopts::ParseResult result) {
                     }
                     if (choice == 'n') return 1;
                 }
+            } else if (result) {
+                std::cout << fmt::format("user code error : code {}", result) << std::endl;
+                return result;
             }
         }
     }
@@ -138,6 +160,10 @@ int main(int argc, char *argv[]) {
         ("c,config", "Data config path", cxxopts::value<std::string>()->default_value(""))
         ("compare", "Enable comparing output with answer", cxxopts::value<bool>()->default_value("true"))
         ("show-id", "Enable showing data id", cxxopts::value<bool>()->default_value("false"))
+        ("t,time-limit", "Program running time limit(ms)", cxxopts::value<long long>()->default_value(std::to_string(default_config.GetTimeLimit().count())))
+        ("m,memory-limit", "Program running memory limit(mb)"
+            "(-1 indicates unlimited)", cxxopts::value<int>()->default_value(std::to_string(default_config.GetMemoryLimit())))
+        ("print-used", "Enable printing time and memory used", cxxopts::value<bool>()->default_value(default_config.GetPrintingUsed() ? "true" : "false"))
         ("h,help", "Print usage")
     ;
     auto result = options.parse(argc, argv);
