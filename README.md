@@ -67,6 +67,7 @@ int main() {
   - 目前还不支持区分 gen、std 和 usr。
 - 命令参数 `-u {path_to_user_code}` 设置用户代码目录。
   - 设置了用户代码目录后，可以通过命令参数 `--compare` 开启对拍模式。
+    - `--compare` 默认开启，但只有 `-u` 参数不为空时才有效。
   - 这是对拍命令示例：`.\oigen -n 1000 -p chk -u usr.cpp -f data --show-id -t 1000 -m 256 --print-used`。
   - 使用示例命令后，OI Generator 将会在 `chk` 目录下对拍 1000 次，并且展示数据编号。
   - 时间限制为 1000ms，空间限制为 256mb，输出代码运行消耗时间和空间。
