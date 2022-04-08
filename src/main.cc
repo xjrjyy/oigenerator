@@ -65,6 +65,14 @@ int generate(cxxopts::ParseResult result) {
             return 1;
         }
     }
+    if (!data_config.empty() && data_config.size() < num_data) {
+        std::cout << fmt::format("Warning: "
+            "You want to generate {} sets of data, "
+            "but only {} sets are configured",
+            num_data,
+            data_config.size()
+        ) << std::endl;
+    }
     for (std::size_t data_id = 1; data_id <= num_data; ++data_id) {
         if (show_data_id) std::cout << fmt::format("Data #{}", data_id) << std::endl;
         std::string data_filename = fmt::format(data_filename_template, data_id);
