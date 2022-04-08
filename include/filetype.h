@@ -1,5 +1,5 @@
-#ifndef OIGENERATOR_FILETYPE_H
-#define OIGENERATOR_FILETYPE_H
+#ifndef OIGENERATOR_FILETYPE_H_
+#define OIGENERATOR_FILETYPE_H_
 
 enum class FileType {
     Exe,
@@ -9,4 +9,4 @@ enum class FileType {
     Unknown,
 };
 
-#endif // OIGENERATOR_FILETYPE_H
+#endif // OIGENERATOR_FILETYPE_H_

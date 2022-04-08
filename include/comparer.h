@@ -1,5 +1,5 @@
-#ifndef OIGENERATOR_SRC_COMPARER_COMPARER_H
-#define OIGENERATOR_SRC_COMPARER_COMPARER_H
+#ifndef OIGENERATOR_COMPARER_H_
+#define OIGENERATOR_COMPARER_H_
 
 #include "filesystem.h"
 
@@ -12,4 +12,4 @@ public:
     // TODO: Compare std::string & fs::ifstream
 };
 
-#endif // OIGENERATOR_SRC_COMPARER_COMPARER_H
+#endif // OIGENERATOR_COMPARER_H_

@@ -1,5 +1,5 @@
-#ifndef OIGENERATOR_SRC_COMPILER_COMPILER_H
-#define OIGENERATOR_SRC_COMPILER_COMPILER_H
+#ifndef OIGENERATOR_COMPILER_COMPILER_H_
+#define OIGENERATOR_COMPILER_COMPILER_H_
 
 #include <string>
 #include <vector>
@@ -20,4 +20,4 @@ private:
     std::vector<std::string> config_;
 };
 
-#endif // OIGENERATOR_SRC_COMPILER_COMPILER_H
+#endif // OIGENERATOR_COMPILER_COMPILER_H_

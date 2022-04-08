@@ -1,5 +1,5 @@
-#ifndef OIGENERATOR_FILESYSTEM_H
-#define OIGENERATOR_FILESYSTEM_H
+#ifndef OIGENERATOR_FILESYSTEM_H_
+#define OIGENERATOR_FILESYSTEM_H_
 
 #ifdef __APPLE__
 #include <Availability.h> // for deployment target to support pre-catalina targets without std::fs 
@@ -26,4 +26,4 @@ using fstream = ghc::filesystem::fstream;
 }
 #endif
 
-#endif // OIGENERATOR_FILESYSTEM_H
+#endif // OIGENERATOR_FILESYSTEM_H_

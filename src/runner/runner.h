@@ -1,5 +1,5 @@
-#ifndef OIGENERATOR_SRC_RUNNER_RUNNER_H
-#define OIGENERATOR_SRC_RUNNER_RUNNER_H
+#ifndef OIGENERATOR_RUNNER_RUNNER_H_
+#define OIGENERATOR_RUNNER_RUNNER_H_
 
 #include <string>
 #include <unordered_map>
@@ -30,4 +30,4 @@ private:
     Config config_;
 };
 
-#endif // OIGENERATOR_SRC_RUNNER_RUNNER_H
+#endif // OIGENERATOR_RUNNER_RUNNER_H_

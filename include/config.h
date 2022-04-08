@@ -1,5 +1,5 @@
-#ifndef OIGENERATOR_CONFIG_H
-#define OIGENERATOR_CONFIG_H
+#ifndef OIGENERATOR_CONFIG_H_
+#define OIGENERATOR_CONFIG_H_
 
 #include <string>
 #include <map>
@@ -21,4 +21,4 @@ private:
     bool recompiling_;
 };
 
-#endif // OIGENERATOR_CONFIG_H
+#endif // OIGENERATOR_CONFIG_H_
