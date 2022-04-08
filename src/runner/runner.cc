@@ -6,6 +6,7 @@
 #include "fmt/core.h"
 
 #include "compiler/compiler.h"
+#include "utils.hpp"
 
 Runner::Runner(const fs::path &path, const Config &config)
     : path_(path), config_(config), compiled_(false) {}
@@ -37,7 +38,7 @@ int Runner::Start(
         result = system((path_.string() + command).c_str());
     } else if (file_type == FileType::C || file_type == FileType::Cpp) {
         fs::path exe_path = path_;
-        exe_path.replace_extension(".exe");
+        exe_path.replace_extension(exe_extension);
         if (!compiled_ || config_.GetRecompiling()) {
             Compiler compiler(file_type, config_);
             result = compiler.Compile(path_, exe_path);
