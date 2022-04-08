@@ -6,6 +6,7 @@ bool LineByLineComparer::Compare(
     const fs::path &output_path,
     const fs::path &answer_path
 ) const {
+    if (fs::equivalent(output_path, answer_path)) return true;
     fs::ifstream output_file(output_path, std::ios::binary);
     if (!output_file.is_open()) {
         // TODO: log: Cannot open user's output file
