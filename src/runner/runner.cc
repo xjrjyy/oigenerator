@@ -31,27 +31,17 @@ int Runner::Start(
     if (file_type == FileType::Unknown) return -1; // TODO: Magic Number
     if (!fs::exists(path_)) return -1; // TODO: Magic Number
 
-    std::string arguments = " " + extra_arguments;
-    // TODO: Config
-    if (!input_path.empty()) {
-        arguments += fmt::format(" < \"{}\"", input_path.string());
-    }
-    if (!output_path.empty()) {
-        arguments += fmt::format(" > \"{}\"", output_path.string());
-    }
-    if (!error_path.empty()) {
-        arguments += fmt::format(" 2> \"{}\"", error_path.string());
-    }
-
     int result = 0;
     // TODO: time used
+    // TODO: extra time
 #ifdef OIGEN_WIN32
+    std::wstring arguments(extra_arguments.begin(), extra_arguments.end());
     std::wstring exe_file;
     if (file_type == FileType::Exe) {
         exe_file = path_.wstring();
     } else if (file_type == FileType::C || file_type == FileType::Cpp) {
         fs::path exe_path = path_;
-        exe_path.replace_extension(exe_extension);
+        exe_path.replace_extension(OIGEN_EXE_EXTENSION);
         if (!compiled_ || config_.GetRecompiling()) {
             Compiler compiler(file_type, config_);
             result = compiler.Compile(path_, exe_path);
@@ -60,7 +50,8 @@ int Runner::Start(
         }
         exe_file = exe_path.wstring();
     } else if (file_type == FileType::Python) {
-        exe_file = L"python " + path_.wstring();
+        exe_file = L"C:\\ProgramData\\Anaconda3\\python.exe"; // TODO: Env
+        arguments = fmt::format(L"{} {}", path_.wstring(), arguments);
     } else {
         return -1; // TODO: Magic Number
     }
@@ -74,31 +65,54 @@ int Runner::Start(
 	ZeroMemory(&pi, sizeof(pi));
 	ZeroMemory(&sa, sizeof(sa));
 	sa.bInheritHandle = TRUE;
-    si.hStdInput = CreateFileW((const WCHAR *)(input_path.wstring().c_str()), GENERIC_READ,
-                                FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, &sa, OPEN_ALWAYS,
+    if (!input_path.empty()) {
+        si.hStdInput = CreateFileW((const WCHAR *)(input_path.wstring().c_str()),
+                                    GENERIC_READ,
+                                    FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+                                    &sa, OPEN_ALWAYS,
+                                    FILE_ATTRIBUTE_NORMAL, NULL);
+        if (si.hStdInput == INVALID_HANDLE_VALUE) {
+            std::cout << "Unable to open input file" << std::endl;
+        }
+    }
+    if (!output_path.empty()) {
+        si.hStdOutput = CreateFileW((const WCHAR *)(output_path.wstring().c_str()),
+                                    GENERIC_WRITE,
+                                    FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+                                    &sa, CREATE_ALWAYS,
+                                    FILE_ATTRIBUTE_NORMAL, NULL);
+        if (si.hStdOutput == INVALID_HANDLE_VALUE) {
+            std::cout << "Unable to open output file" << std::endl;
+        }
+    }
+    if (!error_path.empty()) {
+        si.hStdError = CreateFileW((const WCHAR *)(error_path.wstring().c_str()),
+                                GENERIC_WRITE,
+                                FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+                                &sa, CREATE_ALWAYS,
                                 FILE_ATTRIBUTE_NORMAL, NULL);
-    si.hStdOutput = CreateFileW((const WCHAR *)(output_path.wstring().c_str()), GENERIC_WRITE,
-                                FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, &sa,
-                                CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-	si.hStdError = CreateFileW((const WCHAR *)(error_path.wstring().c_str()), GENERIC_WRITE,
-	                           FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, &sa, CREATE_ALWAYS,
-	                           FILE_ATTRIBUTE_NORMAL, NULL);
+        if (si.hStdError == INVALID_HANDLE_VALUE) {
+            std::cout << "Unable to open error file" << std::endl;
+        }
+    }
 
     // TODO: env, working directory
+    PTSTR pEnvBlock = GetEnvironmentStrings();
 	if (!CreateProcessW(NULL,
-                         (WCHAR *)(fmt::format(L"\"{}\" {}", exe_file, 
-                            std::wstring(arguments.begin(), arguments.end())).c_str()),
+                         (WCHAR *)(fmt::format(L"\"{}\" {}", exe_file, arguments).c_str()),
                          NULL,
 	                     &sa, TRUE, HIGH_PRIORITY_CLASS | CREATE_NO_WINDOW,
-	                     NULL, // (LPVOID)(env.toLocal8Bit().data()),
-                         NULL, // (const WCHAR *)(workingDirectory.utf16()),
+	                     pEnvBlock,
+                         NULL, // (const WCHAR *)(workingDirectory),
 	                     &si, &pi)) {
 		CloseHandle(si.hStdInput);
         CloseHandle(si.hStdOutput);
 		CloseHandle(si.hStdError);
+	    FreeEnvironmentStrings(pEnvBlock);
         std::cout << "Unable to create process!" << std::endl;
 		return -1; // TODO: Magic Number
 	}
+	FreeEnvironmentStrings(pEnvBlock);
 
 	PROCESS_MEMORY_COUNTERS_EX info;
 	ZeroMemory(&info, sizeof(info));
@@ -111,7 +125,6 @@ int Runner::Start(
 
 			CloseHandle(si.hStdInput);
             CloseHandle(si.hStdOutput);
-
 			CloseHandle(si.hStdError);
 			CloseHandle(pi.hProcess);
 			CloseHandle(pi.hThread);
@@ -136,7 +149,6 @@ int Runner::Start(
 
 				CloseHandle(si.hStdInput);
                 CloseHandle(si.hStdOutput);
-
 				CloseHandle(si.hStdError);
 				CloseHandle(pi.hProcess);
 				CloseHandle(pi.hThread);
@@ -150,7 +162,6 @@ int Runner::Start(
 
 			CloseHandle(si.hStdInput);
             CloseHandle(si.hStdOutput);
-
 			CloseHandle(si.hStdError);
 			CloseHandle(pi.hProcess);
 			CloseHandle(pi.hThread);
@@ -166,7 +177,6 @@ int Runner::Start(
 
 		CloseHandle(si.hStdInput);
 		CloseHandle(si.hStdOutput);
-
 		CloseHandle(si.hStdError);
 		CloseHandle(pi.hProcess);
 		CloseHandle(pi.hThread);
@@ -180,7 +190,6 @@ int Runner::Start(
 	if (exit_code != 0) {
 		CloseHandle(si.hStdInput);
 		CloseHandle(si.hStdOutput);
-
 		CloseHandle(si.hStdError);
 		CloseHandle(pi.hProcess);
 		CloseHandle(pi.hThread);
@@ -202,7 +211,6 @@ int Runner::Start(
 
 	CloseHandle(si.hStdInput);
     CloseHandle(si.hStdOutput);
-
 	CloseHandle(si.hStdError);
 	CloseHandle(pi.hProcess);
 	CloseHandle(pi.hThread);
@@ -216,24 +224,35 @@ int Runner::Start(
     }
 #else
     // TODO: Unix
+    std::string arguments = " " + extra_arguments;
+    // TODO: Config
+    if (!input_path.empty()) {
+        arguments += fmt::format(" < \"{}\"", input_path.string());
+    }
+    if (!output_path.empty()) {
+        arguments += fmt::format(" > \"{}\"", output_path.string());
+    }
+    if (!error_path.empty()) {
+        arguments += fmt::format(" 2> \"{}\"", error_path.string());
+    }
     fs::path exe_path;
     if (file_type == FileType::Exe) { // TODO:
         exe_path = path_;
-        result = system((path_.string() + command).c_str());
+        result = system((path_.string() + arguments).c_str());
     } else if (file_type == FileType::C || file_type == FileType::Cpp) {
         exe_path = path_;
-        exe_path.replace_extension(exe_extension);
+        exe_path.replace_extension(OIGEN_EXE_EXTENSION);
         if (!compiled_ || config_.GetRecompiling()) {
             Compiler compiler(file_type, config_);
             result = compiler.Compile(path_, exe_path);
             if (result) return result; // TODO: Magic Number
             compiled_ = true;
         }
-        result = system((exe_path.string() + command).c_str());
+        result = system((exe_path.string() + arguments).c_str());
     } else if (file_type == FileType::Python) {
         // TODO: set python interpreter path
         // TODO: Time Limit
-        result = system(("python " + path_.string() + command).c_str());
+        result = system(("python " + path_.string() + arguments).c_str());
     } else {
         result = -1; // TODO: Magic Number
     }

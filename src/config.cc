@@ -1,10 +1,24 @@
 #include "config.h"
+#include "utils.hpp"
 
 Config::Config() {
-    compiler_cpp_path_ = "g++";
+    compiler_cpp_path_ = "g++"
+#ifdef OIGEN_WIN32
+    OIGEN_EXE_EXTENSION
+#endif
+    ;
     compile_cpp_command_ = "{compiler} \"{src}\" -std=c++14 -O2 -o \"{exe}\"";
-    compiler_c_path_ = "gcc";
+    compiler_c_path_ = "gcc"
+#ifdef OIGEN_WIN32
+    OIGEN_EXE_EXTENSION
+#endif
+    ;
     compile_c_command_ = "{compiler} \"{src}\" -std=c11 -O2 -o \"{exe}\"";
+    interpreter_python_ = "python"
+#ifdef OIGEN_WIN32
+    OIGEN_EXE_EXTENSION
+#endif
+    ;
     recompiling_ = false;
     time_limit_ = std::chrono::milliseconds(2000);
     memory_limit_ = -1;
@@ -23,6 +37,9 @@ Config::Config(const std::map<std::string, std::string> &config) : Config() {
     }
     if (config.count("compile_c_command")) {
         compile_c_command_ = config.at("compile_c_command");
+    }
+    if (config.count("interpreter_python")) {
+        interpreter_python_ = config.at("interpreter_python");
     }
     if (config.count("recompiling")) {
         // TODO: string to bool
@@ -51,6 +68,9 @@ std::string Config::GetCompilerCPath() const {
 }
 std::string Config::GetCompileCCommand() const {
     return compile_c_command_;
+}
+std::string Config::GetInterpreterPython() const {
+    return interpreter_python_;
 }
 bool Config::GetRecompiling() const {
     return recompiling_;

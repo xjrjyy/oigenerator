@@ -23,6 +23,7 @@ Config ParseConfig(cxxopts::ParseResult result) {
     config_map["compiler_cpp_path"] = result["compiler-cpp"].as<std::string>();
     config_map["compile_c_command"] = result["command-c"].as<std::string>();
     config_map["compile_cpp_command"] = result["command-cpp"].as<std::string>();
+    config_map["interpreter_python"] = result["interpreter-python"].as<std::string>();
     config_map["recompiling"] = (result["recompile"].as<bool>() ? "true" : "false");
     config_map["time_limit"] = std::to_string(result["time-limit"].as<long long>());
     config_map["memory_limit"] = std::to_string(result["memory-limit"].as<int>());
@@ -39,6 +40,7 @@ int Generate(cxxopts::ParseResult option) {
     fs::path gen_path(option["gen"].as<std::string>());
     fs::path std_path(option["std"].as<std::string>());
     fs::path usr_path(option["usr"].as<std::string>());
+    // TODO: error file
 
     std::string data_filename_template = option["file"].as<std::string>();
     std::string input_extension = option["in"].as<std::string>();
@@ -157,6 +159,7 @@ int main(int argc, char *argv[]) {
         ("compiler-cpp", "Cpp compiler path", cxxopts::value<std::string>()->default_value(default_config.GetCompilerCppPath()))
         ("command-c", "C compile command", cxxopts::value<std::string>()->default_value(default_config.GetCompileCCommand()))
         ("command-cpp", "Cpp compile command", cxxopts::value<std::string>()->default_value(default_config.GetCompileCppCommand()))
+        ("interpreter-python", "Python interpreter path", cxxopts::value<std::string>()->default_value(default_config.GetInterpreterPython()))
         ("c,config", "Data config path", cxxopts::value<std::string>()->default_value(""))
         ("compare", "Enable comparing output with answer", cxxopts::value<bool>()->default_value("true"))
         ("show-id", "Enable showing data id", cxxopts::value<bool>()->default_value("false"))

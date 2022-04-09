@@ -50,7 +50,10 @@ int main() {
 
 测试数据默认生成在目录 `data` 下，默认对 C++ 文件使用 `{compiler} "{src}" -std=c++14 -O2 -o "{exe}"` 命令进行编译。
 
-由于默认的 C++ 编译器路径是 `g++`，如果你没有配置环境变量，需要使用 `--compiler-cpp {path_to_compiler}` 参数设置 C++ 编译器路径。
+- 由于默认的 C++ 编译器路径是 `g++(.exe)`，如果你没有配置环境变量，需要使用 `--compiler-cpp {path_to_compiler}` 参数设置 C++ 编译器路径。
+- 由于默认的 Python 解释器路径是 `python(.exe)`，如果你没有配置环境变量，需要使用 `--interpreter-python {path_to_interpreter}` 参数设置 Python 解释器路径。
+  - 使用 Python 支持时，不要忘了 `-g gen.py` 及 `-s std.py`。
+  - 示例：`.\oigen.exe -g gen.py -s std.py --interpreter-python python.exe`。
 
 ## 进阶
 

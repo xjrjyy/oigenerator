@@ -5,15 +5,15 @@
 
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
 #define OIGEN_WIN32
-std::string exe_extension = ".exe";
+#define OIGEN_EXE_EXTENSION ".exe"
 #elif __APPLE__
-std::string exe_extension = ".out";
+#define OIGEN_EXE_EXTENSION ".out"
 #elif __linux__
-std::string exe_extension = ".out";
+#define OIGEN_EXE_EXTENSION ".out"
 #elif __unix__
-std::string exe_extension = ".out";
+#define OIGEN_EXE_EXTENSION ".out"
 #elif defined(_POSIX_VERSION)
-std::string exe_extension = ".out";
+#define OIGEN_EXE_EXTENSION ".out"
 #else
 #   error "Unknown compiler"
 #endif

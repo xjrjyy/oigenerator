@@ -13,6 +13,7 @@ public:
     std::string GetCompileCppCommand() const;
     std::string GetCompilerCPath() const;
     std::string GetCompileCCommand() const;
+    std::string GetInterpreterPython() const;
     bool GetRecompiling() const;
     std::chrono::milliseconds GetTimeLimit() const;
     int GetMemoryLimit() const;
@@ -22,6 +23,7 @@ private:
     std::string compile_cpp_command_;
     std::string compiler_c_path_;
     std::string compile_c_command_;
+    std::string interpreter_python_;
     bool recompiling_;
     std::chrono::milliseconds time_limit_;
     int memory_limit_;
