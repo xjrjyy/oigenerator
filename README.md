@@ -4,6 +4,8 @@ OI Generator 是一款测试数据生成辅助工具，目前支持 Windows 和 
 
 你还在为生成数据而烦恼吗？只需提供数据生成器和标程，OI Generator 就可以帮助你快速生成大量测试数据。
 
+下载：[releases](https://gitee.com/jyyjyy/oigenerator/releases)。
+
 ## 入门
 
 输入 `oigen(.exe) -h` 查看帮助。
