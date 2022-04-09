@@ -50,7 +50,8 @@ int Runner::Start(
         }
         exe_file = exe_path.wstring();
     } else if (file_type == FileType::Python) {
-        exe_file = L"C:\\ProgramData\\Anaconda3\\python.exe"; // TODO: Env
+        std::string exe_file_string = config_.GetInterpreterPython();
+        exe_file = std::wstring(exe_file_string.begin(), exe_file_string.end()); // TODO: Env
         arguments = fmt::format(L"{} {}", path_.wstring(), arguments);
     } else {
         return -1; // TODO: Magic Number
@@ -224,7 +225,8 @@ int Runner::Start(
     }
 #else
     // TODO: Unix
-    std::string arguments = " " + extra_arguments;
+    // TODO: Time Limit
+    std::string arguments = extra_arguments;
     // TODO: Config
     if (!input_path.empty()) {
         arguments += fmt::format(" < \"{}\"", input_path.string());
@@ -238,7 +240,9 @@ int Runner::Start(
     fs::path exe_path;
     if (file_type == FileType::Exe) { // TODO:
         exe_path = path_;
-        result = system((path_.string() + arguments).c_str());
+        // TODO: working directory
+        if (path_.filename() == path_) exe_path = fs::path(".") / exe_path;
+        result = system(fmt::format("\"{}\" {}", exe_path.string(), arguments).c_str());
     } else if (file_type == FileType::C || file_type == FileType::Cpp) {
         exe_path = path_;
         exe_path.replace_extension(OIGEN_EXE_EXTENSION);
@@ -248,11 +252,16 @@ int Runner::Start(
             if (result) return result; // TODO: Magic Number
             compiled_ = true;
         }
-        result = system((exe_path.string() + arguments).c_str());
+        // TODO: working directory
+        if (path_.filename() == path_) exe_path = fs::path(".") / exe_path;
+        result = system(fmt::format("\"{}\" {}", exe_path.string(), arguments).c_str());
     } else if (file_type == FileType::Python) {
         // TODO: set python interpreter path
-        // TODO: Time Limit
-        result = system(("python " + path_.string() + arguments).c_str());
+        result = system(fmt::format("\"{}\" {} {}",
+            config_.GetInterpreterPython(),
+            path_.string(),
+            arguments
+        ).c_str());
     } else {
         result = -1; // TODO: Magic Number
     }
