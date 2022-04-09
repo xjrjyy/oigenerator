@@ -105,9 +105,9 @@ int Runner::Start(
 	                     pEnvBlock,
                          NULL, // (const WCHAR *)(workingDirectory),
 	                     &si, &pi)) {
-		CloseHandle(si.hStdInput);
-        CloseHandle(si.hStdOutput);
-		CloseHandle(si.hStdError);
+        if (!input_path.empty()) CloseHandle(si.hStdInput);
+        if (!output_path.empty()) CloseHandle(si.hStdOutput);
+		if (!error_path.empty()) CloseHandle(si.hStdError);
 	    FreeEnvironmentStrings(pEnvBlock);
         std::cout << "Unable to create process!" << std::endl;
 		return -1; // TODO: Magic Number
@@ -123,9 +123,9 @@ int Runner::Start(
 		if (std::max(info.PrivateUsage, info.PeakWorkingSetSize) > (unsigned int)config_.GetMemoryLimit() * 1024 * 1024) {
 			TerminateProcess(pi.hProcess, 0);
 
-			CloseHandle(si.hStdInput);
-            CloseHandle(si.hStdOutput);
-			CloseHandle(si.hStdError);
+            if (!input_path.empty()) CloseHandle(si.hStdInput);
+            if (!output_path.empty()) CloseHandle(si.hStdOutput);
+            if (!error_path.empty()) CloseHandle(si.hStdError);
 			CloseHandle(pi.hProcess);
 			CloseHandle(pi.hThread);
             std::cout << "Memory Limit Exceeded" << std::endl;
@@ -147,9 +147,9 @@ int Runner::Start(
 			if (std::max(info.PrivateUsage, info.PeakWorkingSetSize) > (unsigned int)config_.GetMemoryLimit() * 1024U * 1024) {
 				TerminateProcess(pi.hProcess, 0);
 
-				CloseHandle(si.hStdInput);
-                CloseHandle(si.hStdOutput);
-				CloseHandle(si.hStdError);
+                if (!input_path.empty()) CloseHandle(si.hStdInput);
+                if (!output_path.empty()) CloseHandle(si.hStdOutput);
+                if (!error_path.empty()) CloseHandle(si.hStdError);
 				CloseHandle(pi.hProcess);
 				CloseHandle(pi.hThread);
                 std::cout << "Memory Limit Exceeded" << std::endl;
@@ -160,9 +160,9 @@ int Runner::Start(
 		if (stop) {
 			TerminateProcess(pi.hProcess, 0);
 
-			CloseHandle(si.hStdInput);
-            CloseHandle(si.hStdOutput);
-			CloseHandle(si.hStdError);
+            if (!input_path.empty()) CloseHandle(si.hStdInput);
+            if (!output_path.empty()) CloseHandle(si.hStdOutput);
+            if (!error_path.empty()) CloseHandle(si.hStdError);
 			CloseHandle(pi.hProcess);
 			CloseHandle(pi.hThread);
             std::cout << "Stop Force" << std::endl;
@@ -175,9 +175,9 @@ int Runner::Start(
 	if (!successful_finished) {
 		TerminateProcess(pi.hProcess, 0);
 
-		CloseHandle(si.hStdInput);
-		CloseHandle(si.hStdOutput);
-		CloseHandle(si.hStdError);
+        if (!input_path.empty()) CloseHandle(si.hStdInput);
+        if (!output_path.empty()) CloseHandle(si.hStdOutput);
+		if (!error_path.empty()) CloseHandle(si.hStdError);
 		CloseHandle(pi.hProcess);
 		CloseHandle(pi.hThread);
         std::cout << "Time Limit Exceeded" << std::endl;
@@ -188,9 +188,9 @@ int Runner::Start(
 	GetExitCodeProcess(pi.hProcess, &exit_code);
 
 	if (exit_code != 0) {
-		CloseHandle(si.hStdInput);
-		CloseHandle(si.hStdOutput);
-		CloseHandle(si.hStdError);
+        if (!input_path.empty()) CloseHandle(si.hStdInput);
+        if (!output_path.empty()) CloseHandle(si.hStdOutput);
+		if (!error_path.empty()) CloseHandle(si.hStdError);
 		CloseHandle(pi.hProcess);
 		CloseHandle(pi.hThread);
         std::cout << fmt::format("exit code is {}\n", exit_code) << std::endl;
@@ -209,9 +209,9 @@ int Runner::Start(
 	GetProcessMemoryInfo(pi.hProcess, (PROCESS_MEMORY_COUNTERS *)&info, sizeof(info));
 	std::size_t memory_used = info.PeakWorkingSetSize;
 
-	CloseHandle(si.hStdInput);
-    CloseHandle(si.hStdOutput);
-	CloseHandle(si.hStdError);
+    if (!input_path.empty()) CloseHandle(si.hStdInput);
+    if (!output_path.empty()) CloseHandle(si.hStdOutput);
+    if (!error_path.empty()) CloseHandle(si.hStdError);
 	CloseHandle(pi.hProcess);
 	CloseHandle(pi.hThread);
 
