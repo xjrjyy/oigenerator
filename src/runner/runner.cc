@@ -55,16 +55,16 @@ int Runner::Start(
     } else {
         return -1; // TODO: Magic Number
     }
-	SetErrorMode(SEM_NOGPFAULTERRORBOX);
-	STARTUPINFOW si;
-	PROCESS_INFORMATION pi;
-	SECURITY_ATTRIBUTES sa;
-	ZeroMemory(&si, sizeof(si));
-	si.cb = sizeof(si);
-	si.dwFlags = STARTF_USESTDHANDLES;
-	ZeroMemory(&pi, sizeof(pi));
-	ZeroMemory(&sa, sizeof(sa));
-	sa.bInheritHandle = TRUE;
+    SetErrorMode(SEM_NOGPFAULTERRORBOX);
+    STARTUPINFOW si;
+    PROCESS_INFORMATION pi;
+    SECURITY_ATTRIBUTES sa;
+    ZeroMemory(&si, sizeof(si));
+    si.cb = sizeof(si);
+    si.dwFlags = STARTF_USESTDHANDLES;
+    ZeroMemory(&pi, sizeof(pi));
+    ZeroMemory(&sa, sizeof(sa));
+    sa.bInheritHandle = TRUE;
     if (!input_path.empty()) {
         si.hStdInput = CreateFileW((const WCHAR *)(input_path.wstring().c_str()),
                                     GENERIC_READ,
@@ -98,122 +98,122 @@ int Runner::Start(
 
     // TODO: env, working directory
     PTSTR pEnvBlock = GetEnvironmentStrings();
-	if (!CreateProcessW(NULL,
+    if (!CreateProcessW(NULL,
                          (WCHAR *)(fmt::format(L"\"{}\" {}", exe_file, arguments).c_str()),
                          NULL,
-	                     &sa, TRUE, HIGH_PRIORITY_CLASS | CREATE_NO_WINDOW,
-	                     pEnvBlock,
+                         &sa, TRUE, HIGH_PRIORITY_CLASS | CREATE_NO_WINDOW,
+                         pEnvBlock,
                          NULL, // (const WCHAR *)(workingDirectory),
-	                     &si, &pi)) {
-		CloseHandle(si.hStdInput);
-        CloseHandle(si.hStdOutput);
-		CloseHandle(si.hStdError);
-	    FreeEnvironmentStrings(pEnvBlock);
+                         &si, &pi)) {
+        if (!input_path.empty()) CloseHandle(si.hStdInput);
+        if (!output_path.empty()) CloseHandle(si.hStdOutput);
+        if (!error_path.empty()) CloseHandle(si.hStdError);
+        FreeEnvironmentStrings(pEnvBlock);
         std::cout << "Unable to create process!" << std::endl;
-		return -1; // TODO: Magic Number
-	}
-	FreeEnvironmentStrings(pEnvBlock);
+        return -1; // TODO: Magic Number
+    }
+    FreeEnvironmentStrings(pEnvBlock);
 
-	PROCESS_MEMORY_COUNTERS_EX info;
-	ZeroMemory(&info, sizeof(info));
-	info.cb = sizeof(info);
-	if (config_.GetMemoryLimit() != -1) {
-		GetProcessMemoryInfo(pi.hProcess, (PROCESS_MEMORY_COUNTERS *)&info, sizeof(info));
+    PROCESS_MEMORY_COUNTERS_EX info;
+    ZeroMemory(&info, sizeof(info));
+    info.cb = sizeof(info);
+    if (config_.GetMemoryLimit() != -1) {
+        GetProcessMemoryInfo(pi.hProcess, (PROCESS_MEMORY_COUNTERS *)&info, sizeof(info));
 
-		if (std::max(info.PrivateUsage, info.PeakWorkingSetSize) > (unsigned int)config_.GetMemoryLimit() * 1024 * 1024) {
-			TerminateProcess(pi.hProcess, 0);
+        if (std::max(info.PrivateUsage, info.PeakWorkingSetSize) > (unsigned int)config_.GetMemoryLimit() * 1024 * 1024) {
+            TerminateProcess(pi.hProcess, 0);
 
-			CloseHandle(si.hStdInput);
-            CloseHandle(si.hStdOutput);
-			CloseHandle(si.hStdError);
-			CloseHandle(pi.hProcess);
-			CloseHandle(pi.hThread);
+            if (!input_path.empty()) CloseHandle(si.hStdInput);
+            if (!output_path.empty()) CloseHandle(si.hStdOutput);
+            if (!error_path.empty()) CloseHandle(si.hStdError);
+            CloseHandle(pi.hProcess);
+            CloseHandle(pi.hThread);
             std::cout << "Memory Limit Exceeded" << std::endl;
-			return -1; // TODO: Magic Number
-		}
-	}
+            return -1; // TODO: Magic Number
+        }
+    }
     bool successful_finished = false;
-	
+    
     auto start_time = std::chrono::steady_clock::now(), end_time = std::chrono::steady_clock::now();
     while (end_time - start_time <= config_.GetTimeLimit()) {
-		if (WaitForSingleObject(pi.hProcess, 0) == WAIT_OBJECT_0) {
-			successful_finished = true;
-			break;
-		}
+        if (WaitForSingleObject(pi.hProcess, 0) == WAIT_OBJECT_0) {
+            successful_finished = true;
+            break;
+        }
 
-		if (config_.GetMemoryLimit() != -1) {
-			GetProcessMemoryInfo(pi.hProcess, (PROCESS_MEMORY_COUNTERS *)&info, sizeof(info));
+        if (config_.GetMemoryLimit() != -1) {
+            GetProcessMemoryInfo(pi.hProcess, (PROCESS_MEMORY_COUNTERS *)&info, sizeof(info));
 
-			if (std::max(info.PrivateUsage, info.PeakWorkingSetSize) > (unsigned int)config_.GetMemoryLimit() * 1024U * 1024) {
-				TerminateProcess(pi.hProcess, 0);
+            if (std::max(info.PrivateUsage, info.PeakWorkingSetSize) > (unsigned int)config_.GetMemoryLimit() * 1024U * 1024) {
+                TerminateProcess(pi.hProcess, 0);
 
-				CloseHandle(si.hStdInput);
-                CloseHandle(si.hStdOutput);
-				CloseHandle(si.hStdError);
-				CloseHandle(pi.hProcess);
-				CloseHandle(pi.hThread);
+                if (!input_path.empty()) CloseHandle(si.hStdInput);
+                if (!output_path.empty()) CloseHandle(si.hStdOutput);
+                if (!error_path.empty()) CloseHandle(si.hStdError);
+                CloseHandle(pi.hProcess);
+                CloseHandle(pi.hThread);
                 std::cout << "Memory Limit Exceeded" << std::endl;
-				return -1; // TODO: Magic Number
-			}
-		}
+                return -1; // TODO: Magic Number
+            }
+        }
         bool stop = false; // TODO: stop
-		if (stop) {
-			TerminateProcess(pi.hProcess, 0);
+        if (stop) {
+            TerminateProcess(pi.hProcess, 0);
 
-			CloseHandle(si.hStdInput);
-            CloseHandle(si.hStdOutput);
-			CloseHandle(si.hStdError);
-			CloseHandle(pi.hProcess);
-			CloseHandle(pi.hThread);
+            if (!input_path.empty()) CloseHandle(si.hStdInput);
+            if (!output_path.empty()) CloseHandle(si.hStdOutput);
+            if (!error_path.empty()) CloseHandle(si.hStdError);
+            CloseHandle(pi.hProcess);
+            CloseHandle(pi.hThread);
             std::cout << "Stop Force" << std::endl;
-			return -1; // TODO: Magic Number
-		}
+            return -1; // TODO: Magic Number
+        }
         using namespace std::chrono_literals;
         std::this_thread::sleep_for(10ms); // TODO: config
         end_time = std::chrono::steady_clock::now();
     }
-	if (!successful_finished) {
-		TerminateProcess(pi.hProcess, 0);
+    if (!successful_finished) {
+        TerminateProcess(pi.hProcess, 0);
 
-		CloseHandle(si.hStdInput);
-		CloseHandle(si.hStdOutput);
-		CloseHandle(si.hStdError);
-		CloseHandle(pi.hProcess);
-		CloseHandle(pi.hThread);
+        if (!input_path.empty()) CloseHandle(si.hStdInput);
+        if (!output_path.empty()) CloseHandle(si.hStdOutput);
+        if (!error_path.empty()) CloseHandle(si.hStdError);
+        CloseHandle(pi.hProcess);
+        CloseHandle(pi.hThread);
         std::cout << "Time Limit Exceeded" << std::endl;
-		return -1; // TODO: Magic Number
-	}
+        return -1; // TODO: Magic Number
+    }
 
     unsigned long exit_code;
-	GetExitCodeProcess(pi.hProcess, &exit_code);
+    GetExitCodeProcess(pi.hProcess, &exit_code);
 
-	if (exit_code != 0) {
-		CloseHandle(si.hStdInput);
-		CloseHandle(si.hStdOutput);
-		CloseHandle(si.hStdError);
-		CloseHandle(pi.hProcess);
-		CloseHandle(pi.hThread);
+    if (exit_code != 0) {
+        if (!input_path.empty()) CloseHandle(si.hStdInput);
+        if (!output_path.empty()) CloseHandle(si.hStdOutput);
+        if (!error_path.empty()) CloseHandle(si.hStdError);
+        CloseHandle(pi.hProcess);
+        CloseHandle(pi.hThread);
         std::cout << fmt::format("exit code is {}\n", exit_code) << std::endl;
-		return -1; // TODO: Magic Number
-	}
+        return -1; // TODO: Magic Number
+    }
 
-	FILETIME creationTime, exitTime, kernelTime, userTime;
-	GetProcessTimes(pi.hProcess, &creationTime, &exitTime, &kernelTime, &userTime);
-	SYSTEMTIME realUserTime, realKernelTime;
-	FileTimeToSystemTime(&userTime, &realUserTime);
-	FileTimeToSystemTime(&kernelTime, &realKernelTime);
-	std::size_t time_used = realUserTime.wMilliseconds + realUserTime.wSecond * 1000 + realUserTime.wMinute * 60 * 1000 +
-	           realUserTime.wHour * 60 * 60 * 1000;
-	int kernel_time_used = realKernelTime.wMilliseconds + realKernelTime.wSecond * 1000 +
-	                     realKernelTime.wMinute * 60 * 1000 + realKernelTime.wHour * 60 * 60 * 1000;
-	GetProcessMemoryInfo(pi.hProcess, (PROCESS_MEMORY_COUNTERS *)&info, sizeof(info));
-	std::size_t memory_used = info.PeakWorkingSetSize;
+    FILETIME creationTime, exitTime, kernelTime, userTime;
+    GetProcessTimes(pi.hProcess, &creationTime, &exitTime, &kernelTime, &userTime);
+    SYSTEMTIME realUserTime, realKernelTime;
+    FileTimeToSystemTime(&userTime, &realUserTime);
+    FileTimeToSystemTime(&kernelTime, &realKernelTime);
+    std::size_t time_used = realUserTime.wMilliseconds + realUserTime.wSecond * 1000 + realUserTime.wMinute * 60 * 1000 +
+               realUserTime.wHour * 60 * 60 * 1000;
+    int kernel_time_used = realKernelTime.wMilliseconds + realKernelTime.wSecond * 1000 +
+                         realKernelTime.wMinute * 60 * 1000 + realKernelTime.wHour * 60 * 60 * 1000;
+    GetProcessMemoryInfo(pi.hProcess, (PROCESS_MEMORY_COUNTERS *)&info, sizeof(info));
+    std::size_t memory_used = info.PeakWorkingSetSize;
 
-	CloseHandle(si.hStdInput);
-    CloseHandle(si.hStdOutput);
-	CloseHandle(si.hStdError);
-	CloseHandle(pi.hProcess);
-	CloseHandle(pi.hThread);
+    if (!input_path.empty()) CloseHandle(si.hStdInput);
+    if (!output_path.empty()) CloseHandle(si.hStdOutput);
+    if (!error_path.empty()) CloseHandle(si.hStdError);
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
 
     if (config_.GetPrintingUsed()) {
         std::cout << fmt::format(
