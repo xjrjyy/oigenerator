@@ -99,6 +99,8 @@ int main() {
 
 你可以这样生成：`oigen(.exe) -n 20 -c conf.txt`（`conf.txt` 为配置文件名）。
 
+**需要注意的是，配置文件中不能出现转义字符（Windows 下的 `^`，Linux 下的 `\`）。**
+
 ## 使用开源项目
 
 - [Catch2](https://github.com/catchorg/Catch2)

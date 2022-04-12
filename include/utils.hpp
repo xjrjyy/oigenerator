@@ -9,6 +9,7 @@
 #elif __APPLE__
 #define OIGEN_EXE_EXTENSION ".out"
 #elif __linux__
+#define OIGEN_LINUX
 #define OIGEN_EXE_EXTENSION ".out"
 #elif __unix__
 #define OIGEN_EXE_EXTENSION ".out"

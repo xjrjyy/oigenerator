@@ -10,7 +10,7 @@
 #include "utils.hpp"
 #include "compiler/compiler.h"
 
-#ifdef OIGEN_WIN32
+#if defined(OIGEN_WIN32)
 #include <windows.h>
 #include <Psapi.h>
 #undef max
@@ -34,7 +34,7 @@ int Runner::Start(
     int result = 0;
     // TODO: time used
     // TODO: extra time
-#ifdef OIGEN_WIN32
+#if defined(OIGEN_WIN32)
     std::wstring arguments(extra_arguments.begin(), extra_arguments.end());
     std::wstring exe_file;
     if (file_type == FileType::Exe) {
@@ -135,7 +135,7 @@ int Runner::Start(
     }
     bool successful_finished = false;
     
-    auto start_time = std::chrono::steady_clock::now(), end_time = std::chrono::steady_clock::now();
+    auto start_time = std::chrono::steady_clock::now(), end_time = start_time;
     while (end_time - start_time <= config_.GetTimeLimit()) {
         if (WaitForSingleObject(pi.hProcess, 0) == WAIT_OBJECT_0) {
             successful_finished = true;
@@ -223,8 +223,67 @@ int Runner::Start(
             memory_used / 1024.0 / 1024.0
         ) << std::endl;
     }
+#elif defined(OIGEN_LINUX)
+    // TODO: Replace " to \"
+    std::string arguments = extra_arguments;
+    // TODO: Config
+    fs::path exe_path;
+    if (file_type == FileType::Exe) { // TODO:
+        exe_path = path_;
+        // TODO: working directory
+        if (path_.filename() == path_) exe_path = fs::path(".") / exe_path;
+    } else if (file_type == FileType::C || file_type == FileType::Cpp) {
+        exe_path = path_;
+        exe_path.replace_extension(OIGEN_EXE_EXTENSION);
+        if (!compiled_ || config_.GetRecompiling()) {
+            Compiler compiler(file_type, config_);
+            result = compiler.Compile(path_, exe_path);
+            if (result) return result; // TODO: Magic Number
+            compiled_ = true;
+        }
+        // TODO: working directory
+        if (path_.filename() == path_) exe_path = fs::path(".") / exe_path;
+    } else if (file_type == FileType::Python) {
+        exe_path = config_.GetInterpreterPython();
+        arguments = fmt::format("\"{}\" {}",
+            path_.string(),
+            arguments
+        );
+    } else {
+        result = -1; // TODO: Magic Number
+    }
+
+    // TODO: Working Directory
+    int watcher_result = WEXITSTATUS(system(fmt::format(
+        "./watcher_unix \"\\\"{}\\\" {}\" \"{}\" \"{}\" \"{}\" {} {}",
+        exe_path.string(),
+        arguments,
+        input_path.string(),
+        output_path.string(),
+        error_path.string(),
+        config_.GetTimeLimit().count(),
+        config_.GetMemoryLimit()
+    ).c_str()));
+    // TODO: Get Result
+    if (watcher_result == 1) {
+        std::cout << "Unable to create Process" << std::endl;
+        return -1; // TODO: Magic Number
+    }
+    if (watcher_result == 2) {
+        // std::cout << fmt::format("exit code is {}\n", exit_code) << std::endl;
+        std::cout << "Runtime Error" << std::endl;
+        return -1; // TODO: Magic Number
+    }
+    if (watcher_result == 3) {
+        std::cout << "Time Limit Exceeded" << std::endl;
+        return -1; // TODO: Magic Number
+    }
+    if (watcher_result == 4) {
+        std::cout << "Memory Limit Exceeded" << std::endl;
+        return -1; // TODO: Magic Number
+    }
 #else
-    // TODO: Unix
+    // TODO: Unix, Mac
     // TODO: Time Limit
     std::string arguments = extra_arguments;
     // TODO: Config
