@@ -4,3 +4,4 @@ target_link_libraries(gen_test PRIVATE catch)
 
 add_subdirectory(dataconfigparser)
 add_subdirectory(comparer)
+add_subdirectory(runner)
