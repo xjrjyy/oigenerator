@@ -14,7 +14,9 @@ public:
     Runner() = delete;
     Runner(const fs::path &, const Config &);
     Runner(const Runner &) = default;
-    // TODO: Runner &&
+    Runner(Runner &&) = default;
+    Runner &operator=(const Runner &) = default;
+    Runner &operator=(Runner &&) = default;
     ~Runner() = default;
     int Start(
         const fs::path & = fs::path(),

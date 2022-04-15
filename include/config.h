@@ -9,6 +9,10 @@ class Config {
 public:
     Config();
     Config(const std::map<std::string, std::string> &);
+    Config(const Config &) = default;
+    Config(Config &&) = default;
+    Config &operator=(const Config &) = default;
+    Config &operator=(Config &&) = default;
     std::string GetCompilerCppPath() const;
     std::string GetCompileCppCommand() const;
     std::string GetCompilerCPath() const;

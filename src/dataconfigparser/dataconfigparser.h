@@ -11,7 +11,9 @@ public:
     DataConfigParser() = delete;
     DataConfigParser(const fs::path &);
     DataConfigParser(const DataConfigParser &) = default;
-    // TODO: DataConfigParser &&
+    DataConfigParser(DataConfigParser &&) = default;
+    DataConfigParser &operator=(const DataConfigParser &) = default;
+    DataConfigParser &operator=(DataConfigParser &&) = default;
     ~DataConfigParser() = default;
     bool Parse();
     std::vector<std::string> GetConfig() const;
