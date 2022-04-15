@@ -57,6 +57,14 @@ int main() {
   - 使用 Python 支持时，不要忘了 `-g gen.py` 及 `-s std.py`。
   - 示例：`oigen(.exe) -g gen.py -s std.py --interpreter-python python(.exe)`。
 
+- C++ 生成数据见 `start(.bat/.sh)`。
+- Python 生成数据见 `start_py(.bat/.sh)`。
+- C++ 对拍见 `start2(.bat/.sh)`。
+
+### Linux
+
+`chmod +x oigen watcher_unix start.sh start2.sh start_py.sh` 获取执行权限。
+
 ## 进阶
 
 当然，你也可以自行魔改 `start(.bat/.sh)`。
