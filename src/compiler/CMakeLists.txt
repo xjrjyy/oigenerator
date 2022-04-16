@@ -9,6 +9,7 @@ target_sources(compiler
 target_link_libraries(compiler PUBLIC
     ghc_filesystem
     fmt::fmt
+    config
 )
 
 target_include_directories(compiler PUBLIC

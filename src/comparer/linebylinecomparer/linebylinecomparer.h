@@ -11,6 +11,9 @@ class LineByLineComparer : public Comparer {
 public:
     LineByLineComparer() = default;
     LineByLineComparer(const LineByLineComparer &) = default;
+    LineByLineComparer(LineByLineComparer &&) = default;
+    LineByLineComparer &operator=(const LineByLineComparer &) = default;
+    LineByLineComparer &operator=(LineByLineComparer &&) = default;
     bool Compare(const fs::path &, const fs::path &) const override;
 private:
     static void Trim(std::string &);

@@ -11,7 +11,9 @@ public:
     Compiler() = delete;
     Compiler(FileType, const Config &);
     Compiler(const Compiler &) = default;
-    // TODO: Compiler &&
+    Compiler(Compiler &&) = default;
+    Compiler &operator=(const Compiler &) = default;
+    Compiler &operator=(Compiler &&) = default;
     ~Compiler() = default;
     int Compile(const fs::path &, const fs::path &); // TODO
 private:

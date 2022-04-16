@@ -1,12 +1,6 @@
-add_executable(oigen "")
-target_sources(oigen
-    PRIVATE
-        config.cc
-        main.cc
-    PUBLIC
-        ${PROJECT_SOURCE_DIR}/include/config.h
-)
+add_executable(oigen main.cc)
 
+add_subdirectory(config)
 add_subdirectory(dataconfigparser)
 add_subdirectory(compiler)
 add_subdirectory(runner)

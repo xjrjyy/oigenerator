@@ -9,6 +9,7 @@ target_sources(runner
 target_link_libraries(runner PUBLIC
     ghc_filesystem
     fmt::fmt
+    config
     compiler
 )
 
